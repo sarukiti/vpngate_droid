@@ -1,9 +1,7 @@
 package dev.planetdisk.vpngate_droid
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +17,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -73,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }else{
             MaterialAlertDialogBuilder(this@MainActivity)
                 .setTitle("Network is unavailable.")
-                .setMessage("Please connect to a network.")
+                .setMessage("Please connect to a network.\nPerhaps network administrator is blocking access to \"vpngate.net\".\nIn that case, please connect to a libre network and reopen this application.")
                 .setPositiveButton("Accept") { _, _ ->
                     finish()
                 }
@@ -139,9 +138,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun checkConnectNetwork(): Boolean {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-        return capabilities != null
+    private fun checkConnectNetwork(): Boolean{
+        var result = true
+        runBlocking {
+            try{
+                VpnGateCsvApi.pingService.getPing()
+            }catch(e: Exception){
+                result = false
+            }
+        }
+        return result
     }
 }
