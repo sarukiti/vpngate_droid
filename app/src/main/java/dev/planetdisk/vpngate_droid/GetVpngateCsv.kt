@@ -15,17 +15,10 @@ interface VpnGateCsvService {
     @GET("/api/iphone/")
     suspend fun getCsv(): String
 }
-interface VpnGatePingService {
-    @GET("/api/iphone/")
-    suspend fun getPing()
-}
 
 object VpnGateCsvApi{
     val retrofitService : VpnGateCsvService by lazy {
         retrofit.create(VpnGateCsvService::class.java)
-    }
-    val pingService: VpnGatePingService by lazy {
-        retrofit.create(VpnGatePingService::class.java)
     }
     fun parseCsv(csvData: String): List<List<String>> {
         var a = csvData.drop(15)

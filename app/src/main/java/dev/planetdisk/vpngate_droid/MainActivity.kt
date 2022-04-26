@@ -39,9 +39,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         prefSetting = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+
         lateinit var vpnGateCache: String
+        var isConnected = true
         val cacheServerList: ArrayList<ServerList> = arrayListOf()
-        if(checkConnectNetwork()){
+
+        try{
+            vpnGateCache = withContext(Dispatchers.Default) {
+                VpnGateCsvApi.retrofitService.getCsv()
+            }
+        }catch(e: Exception) {
+            isConnected = false
+        }
+
+        if(isConnected){
             //初回起動・権限要求
             if(!AppLaunchChecker.hasStartedFromLauncher(this@MainActivity)){
                 MaterialAlertDialogBuilder(this@MainActivity)
@@ -61,9 +72,6 @@ class MainActivity : AppCompatActivity() {
                         finish()
                     }
                     .show()
-            }
-            vpnGateCache = withContext(Dispatchers.Default) {
-                VpnGateCsvApi.retrofitService.getCsv()
             }
             val serverList = VpnGateCsvApi.parseCsv(vpnGateCache)
             serverList.forEach{
@@ -137,16 +145,5 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-    }
-    private fun checkConnectNetwork(): Boolean{
-        var result = true
-        runBlocking {
-            try{
-                VpnGateCsvApi.pingService.getPing()
-            }catch(e: Exception){
-                result = false
-            }
-        }
-        return result
     }
 }
