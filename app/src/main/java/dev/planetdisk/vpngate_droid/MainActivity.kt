@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             }
             val serverList = VpnGateCsvApi.parseCsv(vpnGateCache)
             serverList.forEach{
-                cacheServerList += ServerList(it[0],it[1],it[3],it[5],it[12],it[14])
+                cacheServerList += ServerList(it[0],"IP Address: " + it[1],"Ping: "+it[3],"Country: " + it[5],"Operator: " + it[12],it[14])
             }
         }else{
             MaterialAlertDialogBuilder(this@MainActivity)
