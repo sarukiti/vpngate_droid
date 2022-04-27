@@ -14,9 +14,9 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.File
 import java.lang.Exception
 import java.util.*
 
@@ -40,17 +40,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         prefSetting = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
 
-        lateinit var vpnGateCache: String
-        var isConnected = true
         val cacheServerList: ArrayList<ServerList> = arrayListOf()
-
-        try{
-            vpnGateCache = withContext(Dispatchers.Default) {
-                VpnGateCsvApi.retrofitService.getCsv()
-            }
-        }catch(e: Exception) {
-            isConnected = false
-        }
+        val (isConnected, vpnGateCache) = checkConnectNetwork()
 
         if(isConnected){
             //初回起動・権限要求
@@ -145,5 +136,29 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
+    }
+    private fun checkConnectNetwork(): Pair<Boolean,String> {
+        val readFile = File(applicationContext.filesDir, "vpnGate.csv")
+        var isConnected: Boolean
+        var vpnGateCache: String
+
+        try{
+            vpnGateCache = runBlocking {
+                VpnGateCsvApi.retrofitService.getCsv()
+            }
+            readFile.writer().use {
+                it.write(vpnGateCache)
+            }
+            isConnected = true
+        }catch(e: Exception) {
+            if(readFile.exists()){
+                vpnGateCache = readFile.bufferedReader().use(BufferedReader::readText)
+                isConnected = true
+            }else{
+                vpnGateCache = ""
+                isConnected = false
+            }
+        }
+        return isConnected to vpnGateCache
     }
 }
