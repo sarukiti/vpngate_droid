@@ -1,5 +1,6 @@
 package dev.planetdisk.vpngate_droid
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -118,7 +119,7 @@ class MainActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
             try{
                 startActivity(intent)
-            }catch (e: android.content.ActivityNotFoundException) {
+            }catch (e: ActivityNotFoundException) {
                 MaterialAlertDialogBuilder(this@MainActivity)
                     .setTitle("OpenVPN is not installed.")
                     .setMessage("This application required \"OpenVPN Connect\".\nIf you never installed, please install it.")
