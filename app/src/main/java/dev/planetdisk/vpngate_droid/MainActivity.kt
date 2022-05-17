@@ -3,6 +3,7 @@ package dev.planetdisk.vpngate_droid
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +20,6 @@ import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
 import java.io.File
 import java.lang.Exception
-import java.lang.IllegalArgumentException
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             AppLaunchChecker.onActivityCreate(this@MainActivity)
         }
     }
-    override fun onCreate(savedInstanceState: Bundle?) = runBlocking{
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         prefSetting = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         val (isConnected, vpnGateCache) = checkConnectNetwork()
 
         if(isConnected){
-            //初回起動・権限要求
-            if(!AppLaunchChecker.hasStartedFromLauncher(this@MainActivity)){
+            //権限がないとき権限要求
+            if(!judgeHavePermission()){
                 requestFolderPermissionDialog()
             }
             val serverList = VpnGateCsvApi.parseCsv(vpnGateCache)
@@ -81,9 +81,9 @@ class MainActivity : AppCompatActivity() {
         mAdapter.setOnButtonClickListener(
             object: CustomAdapter.OnButtonClickListener{
                 override fun onButtonClick(server: ServerList) {
-                    try{
+                    if(judgeHavePermission()){
                         saveFile(server)
-                    }catch(e: IllegalArgumentException){
+                    }else{
                         requestFolderPermissionDialog()
                     }
                 }
@@ -151,6 +151,18 @@ class MainActivity : AppCompatActivity() {
         }
         return isConnected to vpnGateCache
     }
+    private fun judgeHavePermission(): Boolean {
+        val uri = prefSetting.getString("uri", null)?.toUri()
+        return if(uri != null){
+            checkCallingOrSelfUriPermission(
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            ) == PackageManager.PERMISSION_GRANTED
+        }else{
+            false
+        }
+    }
+
     private fun requestFolderPermissionDialog(){
         MaterialAlertDialogBuilder(this@MainActivity)
             .setTitle("VPNGate-droid would like to Access Your Folder.")

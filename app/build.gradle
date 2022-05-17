@@ -11,8 +11,8 @@ android {
         minSdk 29
         targetSdk 32
         //targetSdkPreview "Tiramisu"
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
