@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<com.google.android.material.card.MaterialCardView xmlns:tools="http://schemas.android.com/tools"
     style="?attr/materialCardViewElevatedStyle"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:id="@+id/cardView"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:id="@+id/cardView">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +16,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingTop="8dp"
-            android:paddingLeft="16dp">
+            android:paddingStart="16dp"
+            tools:ignore="RtlSymmetry">
             <TextView
                 android:id="@+id/hostName"
                 android:textAppearance="?attr/textAppearanceHeadline6"
@@ -53,7 +53,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:orientation="horizontal">
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
