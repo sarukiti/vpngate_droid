@@ -19,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
 import java.io.File
 import java.lang.Exception
+import java.lang.IllegalArgumentException
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -47,23 +48,7 @@ class MainActivity : AppCompatActivity() {
         if(isConnected){
             //初回起動・権限要求
             if(!AppLaunchChecker.hasStartedFromLauncher(this@MainActivity)){
-                MaterialAlertDialogBuilder(this@MainActivity)
-                    .setTitle("VPNGate-droid would like to Access Your Folder.")
-                    .setMessage("This permission is only used to save OpenVPN profiles.\nIf you allow, the app be able to access only one folder you specify.")
-                    .setNeutralButton("Cancel") { _, _ ->
-                        finish()
-                    }
-                    .setNegativeButton("Decline") { _, _ ->
-                        finish()
-                    }
-                    .setPositiveButton("Accept") { _, _ ->
-                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-                        launcher.launch(intent)
-                    }
-                    .setOnCancelListener {
-                        finish()
-                    }
-                    .show()
+                requestFolderPermissionDialog()
             }
             val serverList = VpnGateCsvApi.parseCsv(vpnGateCache)
             serverList.forEach{
@@ -96,7 +81,11 @@ class MainActivity : AppCompatActivity() {
         mAdapter.setOnButtonClickListener(
             object: CustomAdapter.OnButtonClickListener{
                 override fun onButtonClick(server: ServerList) {
-                    saveFile(server)
+                    try{
+                        saveFile(server)
+                    }catch(e: IllegalArgumentException){
+                        requestFolderPermissionDialog()
+                    }
                 }
             }
         )
@@ -161,5 +150,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return isConnected to vpnGateCache
+    }
+    private fun requestFolderPermissionDialog(){
+        MaterialAlertDialogBuilder(this@MainActivity)
+            .setTitle("VPNGate-droid would like to Access Your Folder.")
+            .setMessage("This permission is only used to save OpenVPN profiles.\nIf you allow, the app be able to access only one folder you specify.")
+            .setNeutralButton("Cancel") { _, _ ->
+                finish()
+            }
+            .setNegativeButton("Decline") { _, _ ->
+                finish()
+            }
+            .setPositiveButton("Accept") { _, _ ->
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                launcher.launch(intent)
+            }
+            .setOnCancelListener {
+                finish()
+            }
+            .show()
     }
 }
